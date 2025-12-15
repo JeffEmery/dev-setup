@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# 2025 Development Environment
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A development environment for creating a modern React based web application.
 
-Currently, two official plugins are available:
+## Framework + Language + Build
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+React, TypeScript, Vite /w esbuild
 
-## React Compiler
+## Developer Setup for Windows
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Windows 11 with WSL2
+  - [Install Windows Terminal from an Administrator PowerShell prompt](https://github.com/microsoft/terminal?tab=readme-ov-file#via-windows-package-manager-cli-aka-winget) `winget install --id Microsoft.WindowsTerminal -e`
+  - [Install WSL2 from an Administrator PowerShell prompt](https://learn.microsoft.com/en-us/windows/wsl/install#install-wsl-command) `wsl --install`
+  - Install Cursor [from the _user_ installation package](https://api2.cursor.sh/updates/download/golden/win32-x64-user/cursor/2.2)
+  - Open Cursor and install Cursor WSL extension `anysphere.remote-wsl`, click on the "Connect To <>" command on the lower left of the Cursor window and select "Connect to WSL"
+  - Install Prettier - Code formatter extension `esbenp.prettier-vscode` (use the legacy version)
 
-## Expanding the ESLint configuration
+- WSL Setup from Ubuntu Bash Shell in Windows Terminal
+  - [Install and use latest stable node.js release](https://github.com/nvm-sh/nvm?tab=readme-ov-file#long-term-support) `nvm install --lts && nvm use --lts`
+  - [Install the pnmp package manager](https://pnpm.io/installation#using-npm) `npm install -g pnpm@latest-10`
+  - Edit the `.bashrc` file to [add a permanent bash alias command](https://pnpm.io/installation#adding-a-permanent-alias-on-posix-systems) `alias pn=pnpm`
+  - [Install GitHub CLI](https://github.com/cli/cli/blob/trunk/docs/install_linux.md])
+  - [Setup GitHub CLI to authenticate via Windows Credential Manager](https://github.com/cli/cli/discussions/10082#discussioncomment-13104245) Install [GitHub CLI in Windows](https://cli.github.com/), add an export for the GITHUB_TOKEN in the `.bashrc` file `export GITHUB_TOKEN=$(gh.exe auth token)`, open PowerShell and log into GitHub `gh auth login`, reopen Ubuntu and run `gh auth status` to reveal a login with the token. Reboot the computer to get the environment to reset in Cursor. Validate `gh auth status` in Cursor Terminal is also logged into GitHub.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+  ```bash
+  (type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
+  	&& sudo mkdir -p -m 755 /etc/apt/keyrings \
+  	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+  	&& cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+  	&& sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+  	&& sudo mkdir -p -m 755 /etc/apt/sources.list.d \
+  	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+  	&& sudo apt update \
+  	&& sudo apt install gh -y
+  ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Create new project
+  - From a WSL bash shell (Ubuntu in Terminal or bash in Cursor)
+  - [Create the project in a WSL folder](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl#:~:text=Note%3A%E2%80%AF%20To,working%20with%20files.) such as `~/code/my-app`
+  - Run Create Vite command to start a new project `pnpx create-vite@latest my-app --template react-ts`
+  - Authenticate to GitHub for CLI `gh auth login`
+  - Add the necessary packages for the development environment
+    - Prettier `pnpm add -D prettier`
+    - Vitest `pnpm add -D vitest`
+    - Husky `pnpm add -D husky`, init `pnpx husky init`
+    - lint-staged `pnpx mrm lint-staged`
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
+    ```json
+    // package.json
+    "scripts": {
+      ...
+      "test": "vitest",
+      "bench": "vitest bench",
+      ...
     },
-  },
-])
-```
+    ...
+    "lint-staged": {
+      "*.{js,jsx,ts,tsx}": [
+          "eslint --quiet --fix"
+      ],
+      "*.{json,js,ts,jsx,tsx,html}": [
+          "prettier --write --ignore-unknown"
+      ]
+    }
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+    // .husky/pre-commit
+    lint-staged
+    pnpm test
+    ```
