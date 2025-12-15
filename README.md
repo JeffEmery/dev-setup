@@ -38,12 +38,21 @@ React, TypeScript, Vite /w esbuild
   - From a WSL bash shell (Ubuntu in Terminal or bash in Cursor)
   - [Create the project in a WSL folder](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl#:~:text=Note%3A%E2%80%AF%20To,working%20with%20files.) such as `~/code/my-app`
   - Run Create Vite command to start a new project `pnpx create-vite@latest my-app --template react-ts`
-  - Authenticate to GitHub for CLI `gh auth login`
+  - Initialize the git repository `git init -b main`
   - Add the necessary packages for the development environment
     - Prettier `pnpm add -D prettier`
     - Vitest `pnpm add -D vitest`
-    - Husky `pnpm add -D husky`, init `pnpx husky init`
     - lint-staged `pnpx mrm lint-staged`
+    - Husky `pnpm add -D husky`, init `pnpx husky init`
+    - Modify the Husky pre-commit file
+
+    ```json
+    // .husky\pre-commit
+    lint-staged
+    pnpm test
+    ```
+
+    - Modify the `package.json` file for vitest and lint-staged
 
     ```json
     // package.json
@@ -56,14 +65,12 @@ React, TypeScript, Vite /w esbuild
     ...
     "lint-staged": {
       "*.{js,jsx,ts,tsx}": [
-          "eslint --quiet --fix"
+          "eslint --cache --fix"
       ],
       "*.{json,js,ts,jsx,tsx,html}": [
           "prettier --write --ignore-unknown"
       ]
     }
 
-    // .husky/pre-commit
-    lint-staged
-    pnpm test
+
     ```
