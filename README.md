@@ -39,15 +39,64 @@ React, TypeScript, Vite /w esbuild
   - [Create the project in a WSL folder](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl#:~:text=Note%3A%E2%80%AF%20To,working%20with%20files.) such as `~/code/my-app`
   - Run Create Vite command to start a new project `pnpx create-vite@latest my-app --template react-ts`
   - Initialize the git repository `git init -b main`
+  - Require `pnpm` package manager, https://github.com/pnpm/only-allow/issues/33#issuecomment-3094948348
+    create the `.npmrc` file and add setting `engine-strict=true`
+
+    ```json
+    // .npmrc
+    engine-strict=true
+    ```
+
+    ```json
+    // package.json
+    ...
+    "engines": {
+      "node": ">=24.12.0"
+    },
+    "devEngines": {
+      "packageManager": {
+        "name": "pnpm",
+        "version": "^10.20.0",
+        "onFail": "error"
+      }
+    },
+    ```
+
+  - Add security settings to `pnmp-workspace.yaml`
+
+    ```yaml
+    # https://pnpm.io/blog/2025/12/05/newsroom-npm-supply-chain-security
+
+    strictDepBuilds: true
+
+    onlyBuiltDependencies:
+      - package-with-necessary-build-scripts
+
+    ignoredBuiltDependencies:
+      - package-with-unnecessary-build-scripts
+
+    minimumReleaseAge: 10080
+
+    minimumReleaseAgeExclude:
+      - package-with-critical-hotfix@1.2.3
+
+    trustPolicy: no-downgrade
+
+    trustPolicyExclude:
+      - package-that-migrated-cicd@1.2.3
+    ```
+
   - Add the necessary packages for the development environment
     - Prettier `pnpm add -D prettier`
     - Vitest `pnpm add -D vitest`
-    - lint-staged `pnpx mrm lint-staged`
+    - lint-staged `pnpm add -D lint-staged`
+    - eslint-plugin-react-x, eslint-plugin-react-dom `pnpm add -D eslint-plugin-react-x eslint-plugin-react-dom`, per VITE_README.md
+
     - Husky `pnpm add -D husky`, init `pnpx husky init`
     - Modify the Husky pre-commit file
 
-    ```json
-    // .husky\pre-commit
+    ```yaml
+    # .husky\pre-commit
     lint-staged
     pnpm test
     ```
